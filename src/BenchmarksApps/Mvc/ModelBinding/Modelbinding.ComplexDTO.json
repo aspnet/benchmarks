@@ -1,0 +1,75 @@
+{
+  "Id": "asdf",
+  "Company": "Contoso",
+  "Name": "John Doe",
+  "Title": "Developer",
+  "Address": "One Microsoft Way",
+  "City": "Bellevue",
+  "Region": "Washington",
+  "PostalCode": "98052",
+  "Country": "United States",
+  "Number": "+1 (111) 111 1111",
+  "Fax": "+2 (222) 222 2222",
+  "Orders": [
+    {
+      "Id": 1,
+      "ComplexDtoRootId": "asdf",
+      "OrderDate": "1970-01-01T12:00:00.0Z",
+      "DueDate": "1970-02-01T12:00:00.0Z",
+      "ShipDate": "1970-01-15T12:00:00.0Z",
+      "Via": 3,
+      "Freight": 5.3,
+      "ShipAddress": "One Microsoft Way",
+      "ShipCity": "Bellevue",
+      "ShipRegion": "Washington",
+      "ShipPostalCode": "98052",
+      "ShipCountry": "United States",
+      "OrderDetails": [
+        {
+          "OrderId": 1,
+          "ProductId": 1,
+          "UnitPrice": 0.99,
+          "Quantity": 5,
+          "Discount": 0.15
+        },
+        {
+          "OrderId": 1,
+          "ProductId": 2,
+          "UnitPrice": 1.99,
+          "Quantity": 3,
+          "Discount": 0.10
+        }
+      ]
+    },
+    {
+      "Id": 2,
+      "ComplexDtoRootId": "asdf",
+      "OrderDate": "1970-01-01T12:00:00.0Z",
+      "DueDate": "1970-02-01T12:00:00.0Z",
+      "ShipDate": "1970-01-15T12:00:00.0Z",
+      "Via": 4,
+      "Freight": 4.5,
+      "ShipAddress": "One Microsoft Way",
+      "ShipCity": "Bellevue",
+      "ShipRegion": "Washington",
+      "ShipPostalCode": "98052",
+      "ShipCountry": "United States",
+      "OrderDetails": [
+        {
+          "OrderId": 2,
+          "ProductId": 3,
+          "UnitPrice": 3.99,
+          "Quantity": 10,
+          "Discount": 0.5
+        },
+        {
+          "OrderId": 4,
+          "ProductId": 4,
+          "UnitPrice": 9.99,
+          "Quantity": 100,
+          "Discount": 0.20
+        }
+      ]
+    }
+  ]
+}

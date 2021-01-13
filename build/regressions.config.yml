@@ -45,6 +45,12 @@ sources:
       - include: ApiCrud.*
         labels: 
           - area-mvc
+      - include: ModelBinding.*
+        labels:
+          - area-mvc
+      - include: Mvc.*
+        labels:
+          - area-mvc
     daysToLoad: 14
     stdevCount: 7
     daysToSkip: 1 # allow one day of benchmarks before filing an issue, to detect false positives

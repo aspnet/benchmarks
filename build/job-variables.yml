@@ -36,6 +36,9 @@ variables:
 - name: crudApiJobs
   value: --config https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/benchmarks.crudapi.yml
 
+- name: modelBindingJobs
+  value: --config https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/ModelBinding/benchmarks.modelbinding.yml
+
 # v2
 
 - name: signalRJobs

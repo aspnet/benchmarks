@@ -60,6 +60,20 @@ parameters:
   - displayName: API remove existing element
     arguments: --scenario ApiCrudDeleteProduct $(crudApiJobs) --property scenario=ApiCrudDeleteProduct
 
+  # Modelbinding
+  - displayName: Bind complex model from form data
+    arguments: --scenario ModelBindingComplexDtoFromForm $(modelBindingJobs) --property scenario="ModelBindingComplexDtoFromForm"
+  - displayName: Bind complex model from query
+    arguments: --scenario ModelBindingComplexDtoFromQuery $(modelBindingJobs) --property scenario="ModelBindingComplexDtoFromQuery"
+  - displayName: Bind complex model from the body (JSON)
+    arguments: --scenario ModelBindingComplexDtoFromBody $(modelBindingJobs) --property scenario="ModelBindingComplexDtoFromBody"
+  - displayName: Bind complex model from form data with validation
+    arguments: --scenario ModelBindingComplexValidationDtoFromForm $(modelBindingJobs) --property scenario="ModelBindingComplexValidationDtoFromForm"
+  - displayName: Bind complex model from query with validation
+    arguments: --scenario ModelBindingComplexValidationDtoFromQuery $(modelBindingJobs) --property scenario="ModelBindingComplexValidationDtoFromQuery"
+  - displayName: Bind complex model from the body (JSON) with validation
+    arguments: --scenario ModelBindingComplexValidationDtoFromBody $(modelBindingJobs) --property scenario="ModelBindingComplexValidationDtoFromBody"
+
 steps:
   - ${{ each s in parameters.scenarios }}:
     - task: PublishToAzureServiceBus@1

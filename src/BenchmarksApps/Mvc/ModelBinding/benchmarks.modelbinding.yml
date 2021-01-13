@@ -1,0 +1,323 @@
+﻿# Examples:
+# --config benchmarks.crudapi.yml --scenario ApiCrudListProducts --profile aspnet-perf-lin
+
+imports:
+- https://raw.githubusercontent.com/dotnet/crank/master/src/Microsoft.Crank.Jobs.Bombardier/bombardier.yml
+- https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/mvcserver.yml
+
+variables:
+    serverPort: 5000
+
+scenarios:
+
+  # Primitive types binding
+
+  ModelbindingNoModelBinding:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/None
+
+  ModelBindingRouteBindString:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/FromRoute/String/value
+
+  ModelBindingRouteBindInt:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/FromRoute/Int32/1
+
+  ModelBindingRouteBindStringImplicitly:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/Implicit/FromRoute/String/value
+
+  ModelBindingRouteBindMultipleString:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/FromRoute/String_String_String/value1/value2/value3
+
+  ModelBindingRouteBindMultipleInt:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/FromRoute/Int32_Int32_Int32/1/2/3
+
+  ModelBindingQueryBindString:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/FromQuery/String?value=value
+
+  ModelBindingQueryBindInt:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/FromQuery/Int32?value=1
+
+  ModelBindingQueryBindStringImplicitly:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/Implicit/FromQuery/String?value=value
+
+  ModelBindingQueryBindMultipleString:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/FromQuery/String_String_String?value1=value&value2=value&value3=value
+
+  ModelBindingQueryBindMultipleInt:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/FromQuery/Int32_Int32_Int32?value1=1&value2=2&value3=3
+
+  ModelBindingBasicDtoFromBody:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        verb: POST
+        headers:
+          jsonInput: '--header "content-type: application/json"'
+        presetHeaders: 'jsonInput'
+        path: /Modelbinding/BasicDTO/FromBody
+        bodyFile: https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/ModelBinding/Modelbinding.BasicDTO.json
+
+  ModelBindingBasicDtoFromQuery:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/BasicDTO/FromQuery?Street="One Microsoft Way"&StreetNumber=1&ResidenceType="Office Building"&ResidenceNumber="48"&Country="United States of America"&ZipCode="98052"
+
+  ModelBindingBasicDtoFromForm:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        verb: POST
+        headers:
+          formInput: '--header "content-type: application/x-www-form-urlencoded"'
+        presetHeaders: 'formInput'
+        path: /Modelbinding/BasicDTO/FromForm
+        bodyFile: https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/ModelBinding/Modelbinding.BasicDTO.form
+
+  ModelBindingComplexDtoFromBody:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        verb: POST
+        headers:
+          jsonInput: '--header "content-type: application/json"'
+        presetHeaders: 'jsonInput'
+        path: /Modelbinding/ComplexDTO/FromBody
+        bodyFile: https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/ModelBinding/Modelbinding.ComplexDTO.json
+
+  ModelBindingComplexDtoFromQuery:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/ComplexDTO/FromQuery?Id="asdf"&Company="Contoso"&Name="John+Doe"&Title="Developer"&Address="One+Microsoft+Way"&City="Bellevue"&Region="Washington"&PostalCode="98052"&Country="United+States"&Number="%2B1+(111)+111+1111"&Fax="%2B2+(222)+222+2222"&Orders[0].Id=1&Orders[0].ComplexDtoRootId="asdf"&Orders[0].OrderDate="1970-01-01T12:00:00%2B0"&Orders[0].DueDate="1970-02-01T12:00:00%2B0"&Orders[0].ShipDate="1970-01-15T12:00:00%2B0"&Orders[0].Via=3&Orders[0].Freight=5.3&Orders[0].ShipAddress="One+Microsoft+Way"&Orders[0].ShipCity="Bellevue"&Orders[0].ShipRegion="Washington"&Orders[0].ShipPostalCode="98052"&Orders[0].ShipCountry="United+States"&Orders[0].OrderDetails[0].OrderId=1&Orders[0].OrderDetails[0].ProductId=1&Orders[0].OrderDetails[0].UnitPrice=0.99&Orders[0].OrderDetails[0].Quantity=5&Orders[0].OrderDetails[0].Discount=0.1&Orders[0].OrderDetails[1].OrderId=1&Orders[0].OrderDetails[1].ProductId=2&Orders[0].OrderDetails[1].UnitPrice=1.99&Orders[0].OrderDetails[1].Quantity=3&Orders[0].OrderDetails[1].Discount=0.1&Orders[1].Id=2&Orders[1].ComplexDtoRootId="asdf"&Orders[1].OrderDate="1970-01-01T12:00:00%2B0"&Orders[1].DueDate="1970-02-01T12:00:00%2B0"&Orders[1].ShipDate="1970-01-15T12:00:00%2B0"&Orders[1].Via=4&Orders[1].Freight=4.5&Orders[1].ShipAddress="One+Microsoft+Way"&Orders[1].ShipCity="Bellevue"&Orders[1].ShipRegion="Washington"&Orders[1].ShipPostalCode="98052"&Orders[1].ShipCountry="United+States"&Orders[1].OrderDetails[0].OrderId=2&Orders[1].OrderDetails[0].ProductId=3&Orders[1].OrderDetails[0].UnitPrice=3.99&Orders[1].OrderDetails[0].Quantity=10&Orders[1].OrderDetails[0].Discount=0.&Orders[1].OrderDetails[1].OrderId=4&Orders[1].OrderDetails[1].ProductId=4&Orders[1].OrderDetails[1].UnitPrice=9.99&Orders[1].OrderDetails[1].Quantity=100&Orders[1].OrderDetails[1].Discount=0.2
+
+  ModelBindingComplexDtoFromForm:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        verb: POST
+        headers:
+          formInput: '--header "content-type: application/x-www-form-urlencoded"'
+        presetHeaders: 'formInput'
+        path: /Modelbinding/ComplexDTO/FromForm
+        bodyFile: https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/ModelBinding/Modelbinding.ComplexDTO.form
+
+  ModelBindingComplexValidationDtoFromBody:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        verb: POST
+        headers:
+          jsonInput: '--header "content-type: application/json"'
+        presetHeaders: 'jsonInput'
+        path: /Modelbinding/ComplexDtoWithValidation/FromBody
+        bodyFile: https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/ModelBinding/Modelbinding.ComplexDTO.json
+
+  ModelBindingComplexValidationDtoFromQuery:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        path: /Modelbinding/ComplexDtoWithValidation/FromQuery?Id="asdf"&Company="Contoso"&Name="John+Doe"&Title="Developer"&Address="One+Microsoft+Way"&City="Bellevue"&Region="Washington"&PostalCode="98052"&Country="United+States"&Number="%2B1+(111)+111+1111"&Fax="%2B2+(222)+222+2222"&Orders[0].Id=1&Orders[0].ComplexDtoRootId="asdf"&Orders[0].OrderDate="1970-01-01T12:00:00%2B0"&Orders[0].DueDate="1970-02-01T12:00:00%2B0"&Orders[0].ShipDate="1970-01-15T12:00:00%2B0"&Orders[0].Via=3&Orders[0].Freight=5.3&Orders[0].ShipAddress="One+Microsoft+Way"&Orders[0].ShipCity="Bellevue"&Orders[0].ShipRegion="Washington"&Orders[0].ShipPostalCode="98052"&Orders[0].ShipCountry="United+States"&Orders[0].OrderDetails[0].OrderId=1&Orders[0].OrderDetails[0].ProductId=1&Orders[0].OrderDetails[0].UnitPrice=0.99&Orders[0].OrderDetails[0].Quantity=5&Orders[0].OrderDetails[0].Discount=0.1&Orders[0].OrderDetails[1].OrderId=1&Orders[0].OrderDetails[1].ProductId=2&Orders[0].OrderDetails[1].UnitPrice=1.99&Orders[0].OrderDetails[1].Quantity=3&Orders[0].OrderDetails[1].Discount=0.1&Orders[1].Id=2&Orders[1].ComplexDtoRootId="asdf"&Orders[1].OrderDate="1970-01-01T12:00:00%2B0"&Orders[1].DueDate="1970-02-01T12:00:00%2B0"&Orders[1].ShipDate="1970-01-15T12:00:00%2B0"&Orders[1].Via=4&Orders[1].Freight=4.5&Orders[1].ShipAddress="One+Microsoft+Way"&Orders[1].ShipCity="Bellevue"&Orders[1].ShipRegion="Washington"&Orders[1].ShipPostalCode="98052"&Orders[1].ShipCountry="United+States"&Orders[1].OrderDetails[0].OrderId=2&Orders[1].OrderDetails[0].ProductId=3&Orders[1].OrderDetails[0].UnitPrice=3.99&Orders[1].OrderDetails[0].Quantity=10&Orders[1].OrderDetails[0].Discount=0.&Orders[1].OrderDetails[1].OrderId=4&Orders[1].OrderDetails[1].ProductId=4&Orders[1].OrderDetails[1].UnitPrice=9.99&Orders[1].OrderDetails[1].Quantity=100&Orders[1].OrderDetails[1].Discount=0.2
+
+  ModelBindingComplexValidationDtoFromForm:
+    application:
+      job: mvcServer
+    load:
+      job: bombardier
+      variables:
+        verb: POST
+        headers:
+          formInput: '--header "content-type: application/x-www-form-urlencoded"'
+        presetHeaders: 'formInput'
+        path: /Modelbinding/ComplexDtoWithValidation/FromForm
+        bodyFile: https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/ModelBinding/Modelbinding.ComplexDTO.form
+
+profiles:
+  local:
+    variables:
+      serverAddress: localhost
+    jobs:
+      application:
+        endpoints:
+          - http://localhost:5010
+      load:
+        endpoints:
+          - http://localhost:5010
+
+  aspnet-citrine-lin:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.102
+      cores: 28
+    jobs:
+      db:
+        endpoints:
+          - http://asp-perf-db:5001
+      application:
+        endpoints:
+          - http://asp-citrine-lin:5001
+        variables:
+          databaseServer: 10.0.0.103
+      load:
+        endpoints:
+          - http://asp-citrine-load:5001
+
+  aspnet-citrine-win:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.104
+      cores: 28
+    jobs:
+      db:
+        endpoints:
+          - http://asp-citrine-load:5001
+      application:
+        endpoints:
+          - http://asp-citrine-win:5001
+        variables:
+          databaseServer: 10.0.0.105
+      load:
+        endpoints:
+          - http://asp-citrine-db:5001
+
+  aspnet-citrine-arm:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.107
+      cores: 32
+    jobs:
+      db:
+        endpoints:
+          - http://asp-citrine-db:5001
+      application:
+        endpoints:
+          - http://asp-citrine-arm:5001
+        variables:
+          databaseServer: 10.0.0.103
+      load:
+        endpoints:
+          - http://asp-citrine-load:5001
+
+  aspnet-citrine-amd:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.106
+      cores: 48
+    jobs:
+      db:
+        endpoints:
+          - http://asp-citrine-load:5001
+      application:
+        endpoints:
+          - http://asp-citrine-amd:5001
+        variables:
+          databaseServer: 10.0.0.105
+      load:
+        endpoints:
+          - http://asp-citrine-db:5001
+
+  aspnet-perf-lin:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.102
+      cores: 12
+    jobs:
+      db:
+        endpoints:
+          - http://asp-perf-db:5001
+      application:
+        endpoints:
+          - http://asp-perf-lin:5001
+        variables:
+          databaseServer: 10.0.0.103
+      load:
+        endpoints:
+          - http://asp-perf-load:5001
+
+  aspnet-perf-win:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.110
+      cores: 12
+    jobs:
+      db:
+        endpoints:
+          - http://asp-perf-load:5001
+      application:
+        endpoints:
+          - http://asp-perf-win:5001
+        variables:
+          databaseServer: 10.0.0.104
+      load:
+        endpoints:
+          - http://asp-perf-db:5001
