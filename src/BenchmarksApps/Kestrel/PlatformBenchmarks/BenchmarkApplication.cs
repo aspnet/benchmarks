@@ -5,6 +5,7 @@ using System;
 using System.Buffers.Text;
 using System.IO.Pipelines;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 
@@ -34,7 +35,7 @@ namespace PlatformBenchmarks
 
         private readonly static AsciiString _plainTextBody = "Hello, World!";
 
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions();
+        private static readonly JsonContext SerializerContext = JsonContext.Default;
 
         private readonly static AsciiString _fortunesTableStart = "<!DOCTYPE html><html><head><title>Fortunes</title></head><body><table><tr><th>id</th><th>message</th></tr>";
         private readonly static AsciiString _fortunesRowStart = "<tr><td>";
@@ -49,6 +50,14 @@ namespace PlatformBenchmarks
 
         [ThreadStatic]
         private static Utf8JsonWriter t_writer;
+
+        [JsonSerializable(typeof(JsonMessage), GenerationMode = JsonSourceGenerationMode.Serialization)]
+        [JsonSerializable(typeof(CachedWorld[]), GenerationMode = JsonSourceGenerationMode.Serialization)]
+        [JsonSerializable(typeof(World[]), GenerationMode = JsonSourceGenerationMode.Serialization)]
+        [JsonSerializable(typeof(World), GenerationMode = JsonSourceGenerationMode.Serialization)]
+        private partial class JsonContext : JsonSerializerContext
+        {
+        }
 
         public static class Paths
         {

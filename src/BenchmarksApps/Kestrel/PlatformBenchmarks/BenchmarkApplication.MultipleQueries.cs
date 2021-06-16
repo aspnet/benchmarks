@@ -3,6 +3,7 @@
 
 using System.IO.Pipelines;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
 namespace PlatformBenchmarks
@@ -11,10 +12,10 @@ namespace PlatformBenchmarks
     {
         private async Task MultipleQueries(PipeWriter pipeWriter, int count)
         {
-            OutputMultipleQueries(pipeWriter, await RawDb.LoadMultipleQueriesRows(count));
+            OutputMultipleQueries(pipeWriter, await RawDb.LoadMultipleQueriesRows(count), SerializerContext.WorldArray);
         }
 
-        private static void OutputMultipleQueries<TWord>(PipeWriter pipeWriter, TWord[] rows)
+        private static void OutputMultipleQueries<TWord>(PipeWriter pipeWriter, TWord[] rows, JsonTypeInfo<TWord[]> jsonTypeInfo)
         {
             var writer = GetWriter(pipeWriter, sizeHint: 160 * rows.Length); // in reality it's 152 for one
 
@@ -32,7 +33,8 @@ namespace PlatformBenchmarks
             utf8JsonWriter.Reset(pipeWriter);
 
             // Body
-            JsonSerializer.Serialize<TWord[]>(utf8JsonWriter, rows, SerializerOptions);
+            JsonSerializer.Serialize(utf8JsonWriter, rows, jsonTypeInfo);
+            utf8JsonWriter.Flush();
 
             // Content-Length
             lengthWriter.WriteNumeric((uint)utf8JsonWriter.BytesCommitted);
