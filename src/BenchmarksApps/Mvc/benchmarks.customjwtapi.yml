@@ -1,0 +1,144 @@
+﻿# Examples:
+# --config benchmarks.jwtapi.yml --scenario ApiCrudListProducts --profile aspnet-perf-lin
+
+imports:
+- https://raw.githubusercontent.com/dotnet/crank/master/src/Microsoft.Crank.Jobs.Bombardier/bombardier.yml
+- https://raw.githubusercontent.com/aspnet/Benchmarks/master/src/BenchmarksApps/Mvc/mvcserver.yml
+
+variables:
+    serverPort: 5000
+
+scenarios:
+    # List products
+  ApiCrudListProducts:
+    application:
+      job: mvcServer
+      buildArguments: 
+      - "/p:UseCustomJwtAuth=true /p:UseAuthorize=true"
+    load:
+      job: bombardier
+      variables:
+        path: /Products?pageNumber=1&pageSize=10
+        headers:
+          authorization: '--header "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJUZXN0IiwiaWF0IjoxNjA3NDc1MDcwLCJleHAiOjE2MzkwMTEwNzQsImF1ZCI6InRlc3QiLCJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6InRlc3QiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbCI6InRlc3RAdGVzdC5jb20ifQ.6PYYUPlpSa3Qo8JedZyK8gnqEHVs75SQLu3Sga0kJsk"'
+        presetHeaders: 'authorization'
+
+profiles:
+  local:
+    variables:
+      serverAddress: localhost
+    jobs:
+      application:
+        endpoints:
+          - http://localhost:5010
+      load:
+        endpoints:
+          - http://localhost:5010
+
+  aspnet-citrine-lin:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.102
+      cores: 28
+    jobs:
+      db:
+        endpoints:
+          - http://asp-perf-db:5001
+      application:
+        endpoints:
+          - http://asp-citrine-lin:5001
+        variables:
+          databaseServer: 10.0.0.103
+      load:
+        endpoints:
+          - http://asp-citrine-load:5001
+
+  aspnet-citrine-win:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.104
+      cores: 28
+    jobs:
+      db:
+        endpoints:
+          - http://asp-citrine-load:5001
+      application:
+        endpoints:
+          - http://asp-citrine-win:5001
+        variables:
+          databaseServer: 10.0.0.105
+      load:
+        endpoints:
+          - http://asp-citrine-db:5001
+
+  aspnet-citrine-arm:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.107
+      cores: 32
+    jobs:
+      db:
+        endpoints:
+          - http://asp-citrine-db:5001
+      application:
+        endpoints:
+          - http://asp-citrine-arm:5001
+        variables:
+          databaseServer: 10.0.0.103
+      load:
+        endpoints:
+          - http://asp-citrine-load:5001
+
+  aspnet-citrine-amd:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.106
+      cores: 48
+    jobs:
+      db:
+        endpoints:
+          - http://asp-citrine-load:5001
+      application:
+        endpoints:
+          - http://asp-citrine-amd:5001
+        variables:
+          databaseServer: 10.0.0.105
+      load:
+        endpoints:
+          - http://asp-citrine-db:5001
+
+  aspnet-perf-lin:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.102
+      cores: 12
+    jobs:
+      db:
+        endpoints:
+          - http://asp-perf-db:5001
+      application:
+        endpoints:
+          - http://asp-perf-lin:5001
+        variables:
+          databaseServer: 10.0.0.103
+      load:
+        endpoints:
+          - http://asp-perf-load:5001
+
+  aspnet-perf-win:
+    variables:
+      serverPort: 5000
+      serverAddress: 10.0.0.110
+      cores: 12
+    jobs:
+      db:
+        endpoints:
+          - http://asp-perf-load:5001
+      application:
+        endpoints:
+          - http://asp-perf-win:5001
+        variables:
+          databaseServer: 10.0.0.104
+      load:
+        endpoints:
+          - http://asp-perf-db:5001
