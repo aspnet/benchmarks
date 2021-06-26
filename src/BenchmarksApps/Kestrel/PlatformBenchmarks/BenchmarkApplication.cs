@@ -35,8 +35,6 @@ namespace PlatformBenchmarks
 
         private readonly static AsciiString _plainTextBody = "Hello, World!";
 
-        private static readonly JsonContext SerializerContext = JsonContext.Default;
-
         private readonly static AsciiString _fortunesTableStart = "<!DOCTYPE html><html><head><title>Fortunes</title></head><body><table><tr><th>id</th><th>message</th></tr>";
         private readonly static AsciiString _fortunesRowStart = "<tr><td>";
         private readonly static AsciiString _fortunesColumn = "</td><td>";
@@ -51,13 +49,19 @@ namespace PlatformBenchmarks
         [ThreadStatic]
         private static Utf8JsonWriter t_writer;
 
-        [JsonSerializable(typeof(JsonMessage), GenerationMode = JsonSourceGenerationMode.Serialization)]
-        [JsonSerializable(typeof(CachedWorld[]), GenerationMode = JsonSourceGenerationMode.Serialization)]
-        [JsonSerializable(typeof(World[]), GenerationMode = JsonSourceGenerationMode.Serialization)]
-        [JsonSerializable(typeof(World), GenerationMode = JsonSourceGenerationMode.Serialization)]
+#if NET6_0_OR_GREATER
+        private static readonly JsonContext SerializerContext = JsonContext.Default;
+
+        [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Serialization)]
+        [JsonSerializable(typeof(JsonMessage))]
+        [JsonSerializable(typeof(CachedWorld[]))]
+        [JsonSerializable(typeof(World[]))]
         private partial class JsonContext : JsonSerializerContext
         {
         }
+#else
+        private static readonly JsonSerializerOptions SerializerOptions = new();
+#endif
 
         public static class Paths
         {
