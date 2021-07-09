@@ -32,7 +32,15 @@ namespace PlatformBenchmarks
             utf8JsonWriter.Reset(pipeWriter);
 
             // Body
-            JsonSerializer.Serialize<World>(utf8JsonWriter, row, SerializerOptions);
+            JsonSerializer.Serialize(
+                utf8JsonWriter,
+                row,
+#if NET6_0_OR_GREATER
+                SerializerContext.World
+#else
+                SerializerOptions
+#endif
+                );
 
             // Content-Length
             lengthWriter.WriteNumeric((uint)utf8JsonWriter.BytesCommitted);
