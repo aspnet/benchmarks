@@ -1,0 +1,10 @@
+
+jobs:
+  websocketServer:
+    source:
+      repository: https://github.com/kondratyev-nv/benchmarks.git
+      branchOrCommit: main
+      project: src/BenchmarksApps/Websocket/BenchmarkServer.csproj
+    readyStateText: Application started
+    runtimeVersion: '6.0.*'
+    waitForExit: false

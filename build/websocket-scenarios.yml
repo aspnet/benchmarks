@@ -1,0 +1,39 @@
+# Websocket scenarios
+
+parameters:
+- name: profile
+  type: string
+  default: ''
+- name: warmup
+  type: number
+  default: 0
+- name: duration
+  type: number
+  default: 15
+- name: connection
+  type: string
+  default: ''
+
+# Scenarios
+- name: scenarios 
+  type: object
+  default: 
+
+  - displayName: Echo
+    arguments: --scenario websocket $(websocketJobs) --variable scenario=echo --property scenario=echo
+
+steps:
+- ${{ each s in parameters.scenarios }}:
+  - task: PublishToAzureServiceBus@1
+    condition: succeededOrFailed()
+    displayName: ${{ s.displayName }}
+    inputs:
+      connectedServiceName: ${{ parameters.connection }}
+      waitForCompletion: true
+      messageBody: |
+        {
+          "timeout": "00:5:00",
+          "name": "crank",
+          "args": [ "${{ s.arguments }} --application.options.collectCounters true --load.options.collectCounters true --warmup.variables.duration ${{ parameters.warmup }} --load.variables.duration ${{ parameters.duration }} --profile ${{ parameters.profile }} --load.channel edge --load.framework net6.0 --warmup.channel edge --warmup.framework net6.0 --application.channel edge --application.framework net6.0 --session $(session) --table WebsocketBenchmarks --sql SQL_CONNECTION_STRING --chart --no-measurements --no-metadata --warmup.options.discardResults true" ]
+        }
+

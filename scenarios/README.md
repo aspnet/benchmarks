@@ -348,6 +348,25 @@ crank --config https://raw.githubusercontent.com/aspnet/Benchmarks/main/scenario
 
 > Note: MessagePack is not supported with ServerSentEvents
 
+## Websockets benchmarks
+
+These scenarios are running various Websockets benchmarks.
+
+### Sample
+
+```
+crank --config https://raw.githubusercontent.com/aspnet/Benchmarks/main/scenarios/websocket.benchmarks.yml --scenario websocket --profile aspnet-perf-lin --variable scenario=echo
+```
+
+### Available scenarios
+
+- `websocket`
+
+#### Arguments
+
+- Scenario:
+  - `--variable scenario=echo`
+
 ## Orchard benchmarks
 
 These scenarios are running various Orchard Core CMS benchmarks with either Sqlite or PostgresQL.

@@ -1,0 +1,19 @@
+{
+  "Default": {
+    "Client": "Websocket",
+    "Source": {
+      "Repository": "https://github.com/aspnet/benchmarks.git",
+      "BranchOrCommit": "main",
+      "Project": "src/BenchmarksApps/Websocket/BenchmarkServer.csproj"
+    },
+    "Connections": 10,
+    "Duration": 20,
+    "Warmup": 2,
+    "Path": "/echo",
+    "ClientProperties": {
+    }
+  },
+  "WebsocketEcho": {
+    "ClientProperties": { "Scenario": "echo" }
+  }
+}

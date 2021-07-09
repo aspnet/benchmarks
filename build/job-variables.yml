@@ -47,6 +47,9 @@ variables:
 - name: signalRJobs
   value: --config https://raw.githubusercontent.com/aspnet/Benchmarks/main/scenarios/signalr.benchmarks.yml
 
+- name: websocketJobs
+  value: --config https://raw.githubusercontent.com/aspnet/Benchmarks/main/scenarios/websocket.benchmarks.yml
+
 - name: proxyJobs
   value: --config https://raw.githubusercontent.com/aspnet/Benchmarks/main/scenarios/proxy.benchmarks.yml
 - name: proxyGRPCJobs

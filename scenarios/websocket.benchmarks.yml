@@ -1,0 +1,24 @@
+﻿# Examples:
+# --config benchmarks.websocket.yml --scenario websocket --variable scenario=echo --profile asp-perf-lin
+
+imports:
+  - https://raw.githubusercontent.com/kondratyev-nv/Benchmarks/main/src/WebsocketClient/websocketclient.yml
+  - https://raw.githubusercontent.com/kondratyev-nv/Benchmarks/main/src/BenchmarksApps/Websocket/websocketServer.yml
+  - https://github.com/aspnet/Benchmarks/blob/main/scenarios/aspnet.profiles.yml?raw=true
+
+variables:
+    serverPort: 5000
+    serverScheme: ws
+
+scenarios:
+  websocket:
+    application:
+      job: websocketServer
+    warmup:
+      job: websocketClient
+      variables:
+        path: /Echo
+    load:
+      job: websocketClient
+      variables:
+        path: /Echo

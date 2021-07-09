@@ -364,11 +364,49 @@ jobs:
       duration: 15
       connection: ASP.NET Benchmarks Mono Queue
 
+- job: Websocket_Linux
+  displayName: Websocket
+  pool: server
+  timeoutInMinutes: 120
+  dependsOn: SignalR_Linux
+  condition: and(succeededOrFailed(), eq(variables['pm'], true))
+  strategy:
+    maxParallel: 1
+    matrix:
+      Intel_Linux:
+        profile: aspnet-citrine-lin
+  steps:
+  - template: websocket-scenarios.yml
+    parameters:
+      profile: $(profile)
+      warmup: 1
+      duration: 15
+      connection: ASP.NET Benchmarks Queue
+
+- job: Websocket_Windows
+  displayName: Websocket
+  pool: server
+  timeoutInMinutes: 120
+  dependsOn: SignalR_Windows
+  condition: and(succeededOrFailed(), eq(variables['pm'], true))
+  strategy:
+    maxParallel: 1
+    matrix:
+      Intel_Windows:
+        profile: aspnet-citrine-win
+  steps:
+  - template: websocket-scenarios.yml
+    parameters:
+      profile: $(profile)
+      warmup: 1
+      duration: 15
+      connection: ASP.NET Benchmarks Mono Queue
+
 - job: SingleFile_Linux
   displayName: Single File
   pool: server
   timeoutInMinutes: 120
-  dependsOn: SignalR_Linux
+  dependsOn: Websocket_Linux
   condition: and(succeededOrFailed(), eq(variables['pm'], true))
   strategy:
     maxParallel: 1
@@ -387,7 +425,7 @@ jobs:
   displayName: Single File
   pool: server
   timeoutInMinutes: 120
-  dependsOn: SignalR_Windows
+  dependsOn: Websocket_Windows
   condition: and(succeededOrFailed(), eq(variables['pm'], true))
   strategy:
     maxParallel: 1

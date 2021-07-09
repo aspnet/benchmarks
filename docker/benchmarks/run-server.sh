@@ -76,7 +76,8 @@ if lscpu | grep -q 'AuthenticAMD'; then
   hardware=AMD64
 fi
 
-mkdir -p /mnt/benchmarks
+mount_dir=/mnt/benchmarks
+mkdir -p $mount_dir
 
 # "--network host" - Better performance than the default "bridge" driver
 # "-v /var/run/docker.sock" - Give container access to the host docker daemon 
@@ -86,7 +87,7 @@ docker run \
     --init \
     --log-opt max-size=10m \
     --log-opt max-file=3 \
-    --mount type=bind,source=/mnt/benchmarks,target=/tmp \
+    --mount type=bind,source=$mount_dir,target=/tmp \
     --name $dockername \
     --network host \
     --restart always \

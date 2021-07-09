@@ -1,0 +1,93 @@
+﻿# Examples:
+# --config benchmarks.websocket.yml --scenario websocket --variable scenario=echo --profile asp-physical-lin
+
+imports:
+  - https://raw.githubusercontent.com/kondratyev-nv/Benchmarks/main/src/WebsocketClient/websocketclient.yml
+  - https://raw.githubusercontent.com/kondratyev-nv/Benchmarks/main/src/BenchmarksApps/Websocket/websocketServer.yml
+
+variables:
+    serverPort: 5000
+
+scenarios:
+  websocket:
+    application:
+      job: websocketServer
+    warmup:
+      job: websocketClient
+      variables:
+        path: /echo
+    load:
+      job: websocketClient
+      variables:
+        path: /echo
+
+profiles:
+  aspnet-physical-lin:
+    variables:
+      serverUri: http://10.0.0.102
+      cores: 12
+    jobs:
+      application:
+        endpoints: 
+          - http://asp-perf-lin:5001
+      warmup:
+        endpoints: 
+          - http://asp-perf-load:5001
+      load:
+        endpoints: 
+          - http://asp-perf-load:5001
+  aspnet-physical-win:
+    variables:
+      serverUri: http://10.0.0.102
+      cores: 12
+    jobs:
+      application:
+        endpoints: 
+          - http://asp-perf-win:5001
+      warmup:
+        endpoints: 
+          - http://asp-perf-load:5001
+      load:
+        endpoints: 
+          - http://asp-perf-load:5001
+  aspnet-citrine-lin:
+    variables:
+      serverUri: http://10.0.0.102
+      cores: 28
+    jobs: 
+      application:
+        endpoints: 
+          - http://asp-citrine-lin:5001
+      warmup:
+        endpoints: 
+          - http://asp-citrine-load:5001
+      load:
+        endpoints: 
+          - http://asp-citrine-load:5001
+  aspnet-citrine-win:
+    variables:
+      serverUri: http://10.0.0.104
+      cores: 28
+    jobs: 
+      application:
+        endpoints: 
+          - http://asp-citrine-win:5001
+      warmup:
+        endpoints: 
+          - http://asp-citrine-load:5001
+      load:
+        endpoints: 
+          - http://asp-citrine-load:5001
+  aspnet-cloud-lin:
+    varaibles:
+      serverUri: http://10.0.0.104
+    jobs:
+      application:
+        endpoints:
+          - http://10.0.0.9:5001
+      warmup:
+        endpoints:
+          - http://10.0.0.10:5002
+      load:
+        endpoints:
+          - http://10.0.0.10:5002

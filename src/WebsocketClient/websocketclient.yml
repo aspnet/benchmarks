@@ -1,0 +1,18 @@
+﻿jobs:
+  websocketClient:
+    source:
+      repository: https://github.com/kondratyev-nv/benchmarks.git
+      branchOrCommit: main
+      project: src/WebsocketClient/WebsocketClient.csproj
+    readyStateText: Websocket Client
+    waitForExit: true
+    variables:
+      connections: 100
+      duration: 15
+      scenario: echo
+      path: /Echo
+      serverScheme: ws
+      serverAddress: localhost
+      serverPort: 5000
+      collectLatency: true
+    arguments: "-c {{connections}} -d {{duration}} -s {{scenario}} -u {% if serverUri == blank or serverUri == empty %} {{serverScheme}}://{{serverAddress}}:{{serverPort}}{{path}} {% else %} {{serverUri}}:{{serverPort}}{{path}} {% endif %} {% if collectLatency != blank %} --latency {{ collectLatency }} {% endif %}"
