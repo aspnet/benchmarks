@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
-    <PackageReference Include="System.Text.Json" Version="6.0.0-preview.7.21326.4" />
+    <PackageReference Include="System.Text.Json" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="Npgsql" Version="6.0.0-preview4" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0-preview4" />
   </ItemGroup>
