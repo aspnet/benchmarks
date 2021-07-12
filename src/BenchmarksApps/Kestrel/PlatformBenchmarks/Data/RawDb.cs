@@ -2,17 +2,23 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Caching.Memory;
+
 using Npgsql;
 
 namespace PlatformBenchmarks
 {
     public class RawDb
     {
+        private static readonly ConcurrentQueue<SqlReadCommand> _sqlReadCommands = new ConcurrentQueue<SqlReadCommand>();
+        private static readonly ConcurrentQueue<SqlFortuneCommand> _sqlFortuneCommands = new ConcurrentQueue<SqlFortuneCommand>();
+        private static readonly object[] _cacheKeys = Enumerable.Range(0, 10001).Select((i) => new CacheKey(i)).ToArray();
         private readonly ConcurrentRandom _random;
         private readonly string _connectionString;
         private readonly MemoryCache _cache = new MemoryCache(
@@ -33,9 +39,10 @@ namespace PlatformBenchmarks
             {
                 await db.OpenAsync();
 
-                var (cmd, _) = CreateReadCommand(db);
-                using (cmd)
+                using (var cmd = CreateReadCommand())
                 {
+                    cmd.Connection = db;
+                    cmd.Parameter.TypedValue = _random.Next(0, 10000) + 1;
                     return await ReadSingleRow(cmd);
                 }
             }
@@ -49,13 +56,14 @@ namespace PlatformBenchmarks
             {
                 await db.OpenAsync();
 
-                var (cmd, idParameter) = CreateReadCommand(db);
-                using (cmd)
+                using (var cmd = CreateReadCommand())
                 {
+                    cmd.Connection = db;
+                    var param = cmd.Parameter;
                     for (int i = 0; i < result.Length; i++)
                     {
+                        param.TypedValue = _random.Next(0, 10000) + 1;
                         result[i] = await ReadSingleRow(cmd);
-                        idParameter.TypedValue = _random.Next(1, 10001);
                     }
                 }
             }
@@ -91,10 +99,10 @@ namespace PlatformBenchmarks
                 {
                     await db.OpenAsync();
 
-                    var (cmd, idParameter) = rawdb.CreateReadCommand(db);
-                    using (cmd)
+                    using (var cmd = CreateReadCommand())
                     {
-                        Func<ICacheEntry, Task<CachedWorld>> create = async (entry) => 
+                        cmd.Connection = db;
+                        Func<ICacheEntry, Task<CachedWorld>> create = async (entry) =>
                         {
                             return await rawdb.ReadSingleRow(cmd);
                         };
@@ -102,14 +110,15 @@ namespace PlatformBenchmarks
                         var cacheKeys = _cacheKeys;
                         var key = cacheKeys[id];
 
-                        idParameter.TypedValue = id;
+                        var param = cmd.Parameter;
+                        param.TypedValue = id;
 
                         for (; i < result.Length; i++)
                         {
                             result[i] = await rawdb._cache.GetOrCreateAsync<CachedWorld>(key, create);
 
                             id = rawdb._random.Next(1, 10001);
-                            idParameter.TypedValue = id;
+                            param.TypedValue = id;
                             key = cacheKeys[id];
                         }
                     }
@@ -125,14 +134,14 @@ namespace PlatformBenchmarks
             {
                 await db.OpenAsync();
 
-                var (cmd, idParameter) = CreateReadCommand(db);
-                using (cmd)
+                using (var cmd = CreateReadCommand())
                 {
+                    cmd.Connection = db;
                     var cacheKeys = _cacheKeys;
                     var cache = _cache;
                     for (var i = 1; i < 10001; i++)
                     {
-                        idParameter.TypedValue = i;
+                        cmd.Parameter.TypedValue = i;
                         cache.Set<CachedWorld>(cacheKeys[i], await ReadSingleRow(cmd));
                     }
                 }
@@ -149,13 +158,14 @@ namespace PlatformBenchmarks
             {
                 await db.OpenAsync();
 
-                var (queryCmd, queryParameter) = CreateReadCommand(db);
-                using (queryCmd)
+                using (var cmd = CreateReadCommand())
                 {
+                    cmd.Connection = db;
+                    var queryParameter = cmd.Parameter;
                     for (int i = 0; i < results.Length; i++)
                     {
-                        results[i] = await ReadSingleRow(queryCmd);
-                        queryParameter.TypedValue = _random.Next(1, 10001);
+                        queryParameter.TypedValue = _random.Next(0, 10000) + 1;
+                        results[i] = await ReadSingleRow(cmd);
                     }
                 }
 
@@ -189,34 +199,46 @@ namespace PlatformBenchmarks
             {
                 await db.OpenAsync();
 
-                using (var cmd = new NpgsqlCommand("SELECT id, message FROM fortune", db))
+                using var cmd = CreateFortuneCommand();
+                cmd.Connection = db;
+
                 using (var rdr = await cmd.ExecuteReaderAsync())
                 {
                     while (await rdr.ReadAsync())
                     {
                         result.Add(new Fortune
                         (
-                            id:rdr.GetInt32(0),
+                            id: rdr.GetInt32(0),
                             message: rdr.GetString(1)
                         ));
                     }
                 }
             }
 
-            result.Add(new Fortune(id: 0, message: "Additional fortune added at request time." ));
+            result.Add(new Fortune(id: 0, message: "Additional fortune added at request time."));
             result.Sort();
 
             return result;
         }
 
-        private (NpgsqlCommand readCmd, NpgsqlParameter<int> idParameter) CreateReadCommand(NpgsqlConnection connection)
+        private static SqlReadCommand CreateReadCommand()
         {
-            var cmd = new NpgsqlCommand("SELECT id, randomnumber FROM world WHERE id = @Id", connection);
-            var parameter = new NpgsqlParameter<int>(parameterName: "@Id", value: _random.Next(1, 10001));
+            if (!_sqlReadCommands.TryDequeue(out var cmd))
+            {
+                cmd = new SqlReadCommand();
+            }
 
-            cmd.Parameters.Add(parameter);
+            return cmd;
+        }
 
-            return (cmd, parameter);
+        private static SqlFortuneCommand CreateFortuneCommand()
+        {
+            if (!_sqlFortuneCommands.TryDequeue(out var cmd))
+            {
+                cmd = new SqlFortuneCommand();
+            }
+
+            return cmd;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -234,7 +256,55 @@ namespace PlatformBenchmarks
             }
         }
 
-        private static readonly object[] _cacheKeys = Enumerable.Range(0, 10001).Select((i) => new CacheKey(i)).ToArray();
+        internal class SqlFortuneCommand : IDisposable
+        {
+            private readonly NpgsqlCommand _cmd;
+
+            public NpgsqlConnection Connection
+            {
+                set { _cmd.Connection = value; }
+            }
+
+            public SqlFortuneCommand()
+            {
+                _cmd = new NpgsqlCommand("SELECT id, message FROM fortune");
+            }
+
+            public Task<NpgsqlDataReader> ExecuteReaderAsync() => _cmd.ExecuteReaderAsync();
+
+            public void Dispose()
+            {
+                _cmd.Connection = null;
+                _sqlFortuneCommands.Enqueue(this);
+            }
+        }
+
+        internal class SqlReadCommand : IDisposable
+        {
+            private readonly NpgsqlCommand _cmd;
+            private readonly NpgsqlParameter<int> _parameter;
+
+            public NpgsqlParameter<int> Parameter => _parameter;
+            public NpgsqlConnection Connection
+            {
+                set { _cmd.Connection = value; }
+            }
+
+            public SqlReadCommand()
+            {
+                _cmd = new NpgsqlCommand("SELECT id, randomnumber FROM world WHERE id = @Id");
+                _parameter = new NpgsqlParameter<int>(parameterName: "@Id", value: 0);
+                _cmd.Parameters.Add(_parameter);
+            }
+
+            public static implicit operator NpgsqlCommand(SqlReadCommand c) => c._cmd;
+
+            public void Dispose()
+            {
+                _cmd.Connection = null;
+                _sqlReadCommands.Enqueue(this);
+            }
+        }
 
         public sealed class CacheKey : IEquatable<CacheKey>
         {
@@ -246,7 +316,7 @@ namespace PlatformBenchmarks
             public bool Equals(CacheKey key)
                 => key._value == _value;
 
-            public override bool Equals(object obj) 
+            public override bool Equals(object obj)
                 => ReferenceEquals(obj, this);
 
             public override int GetHashCode()
